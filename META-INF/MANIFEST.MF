@@ -1,0 +1,6 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: myst-db-gen
+Bundle-SymbolicName: myst-gen
+Bundle-Version: 1.0.0.qualifier
+Export-Package: hr.hrg.myst.gen
