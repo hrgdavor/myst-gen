@@ -2,15 +2,15 @@ package hr.hrg.myst.gen;
 
 import static com.squareup.javapoet.TypeSpec.anonymousClassBuilder;
 import static com.squareup.javapoet.TypeSpec.enumBuilder;
-import static hr.hrg.myst.gen.poet.PoetUtil.*;
+import static hr.hrg.javapoet.PoetUtil.*;
 
 import java.io.IOException;
 
 import com.squareup.javapoet.TypeSpec;
 import com.squareup.javapoet.TypeSpec.Builder;
 
+import hr.hrg.javapoet.BeanCustomizer;
 import hr.hrg.myst.data.ColumnMeta;
-import hr.hrg.myst.gen.poet.BeanCustomizer;
 
 public class GenEnum {
 

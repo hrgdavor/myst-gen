@@ -29,7 +29,7 @@ public class EntityDef {
 	public final ClassName typeUpdate;
 	public final ClassName typeMeta;
 	public final ClassName typeDelta;
-	public final TypeName type;
+	public final ClassName type;
 	
 	public EntityDef(TypeElement clazz){
 		String qName = clazz.getQualifiedName().toString();
@@ -47,7 +47,7 @@ public class EntityDef {
 		else 
 			this.tableName = simpleName.toLowerCase();
 		
-		this.type = TypeName.get(declaredType);
+		this.type = ClassName.get(clazz);
 
 		this.typeEnum      = ClassName.get(packageName, simpleName+"Enum");
 		this.typeImmutable = ClassName.get(packageName, simpleName+"Immutable");

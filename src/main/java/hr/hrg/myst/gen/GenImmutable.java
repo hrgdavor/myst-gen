@@ -1,8 +1,8 @@
 package hr.hrg.myst.gen;
 
 import static com.squareup.javapoet.TypeSpec.classBuilder;
+import static hr.hrg.javapoet.PoetUtil.*;
 import static hr.hrg.myst.gen.MystUtil.*;
-import static hr.hrg.myst.gen.poet.PoetUtil.*;
 
 import java.io.IOException;
 

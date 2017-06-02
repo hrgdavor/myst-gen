@@ -1,9 +1,8 @@
 package hr.hrg.myst.gen;
 
 import static com.squareup.javapoet.TypeSpec.classBuilder;
+import static hr.hrg.javapoet.PoetUtil.*;
 import static hr.hrg.myst.gen.MystUtil.*;
-import static hr.hrg.myst.gen.TypeUtil.*;
-import static hr.hrg.myst.gen.poet.PoetUtil.*;
 
 import com.squareup.javapoet.ArrayTypeName;
 import com.squareup.javapoet.CodeBlock;

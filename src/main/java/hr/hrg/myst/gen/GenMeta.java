@@ -1,6 +1,6 @@
 package hr.hrg.myst.gen;
 
-import static hr.hrg.myst.gen.poet.PoetUtil.*;
+import static hr.hrg.javapoet.PoetUtil.*;
 import static hr.hrg.myst.gen.MystUtil.*;
 
 import java.sql.ResultSet;
