@@ -5,6 +5,8 @@ import javax.persistence.Column;
 
 import com.squareup.javapoet.TypeName;
 
+import hr.hrg.javapoet.PoetUtil;
+
 class Property {
 	/** final, and can only be set in constructor */
 	public boolean readOnly;
@@ -26,6 +28,7 @@ class Property {
 		setterName = "set"+name;
 
 		this.name = name = Character.toLowerCase(name.charAt(0))+name.substring(1);
+		if(PoetUtil.isJavaKeyword(name)) this.name = "_"+name;
 		this.fieldName = this.name;
 		
 		this.columnName = this.name;
