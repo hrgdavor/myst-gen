@@ -28,6 +28,7 @@ public class GenUpdate {
 		if(genBuilder){
 			cp.superclass(def.typeBuilder);			
 		}else{
+			cp.addSuperinterface(def.type);
 			GenBuilder.addInterfaces(def, cp, jackson);
 		}
 		

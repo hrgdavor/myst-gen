@@ -36,11 +36,7 @@ public class GenImmutable {
 			builder.superclass(def.type);						
 		}
 		builder.addSuperinterface(EntityValues.class);
-		builder.addSuperinterface(parametrized(EnumGetter.class, def.typeEnum));
-
-		MethodSpec.Builder constructorBuilder = constructorBuilder(PUBLIC());
-		if(jackson) constructorBuilder.addAnnotation(CN_JsonCreator);
-		
+		builder.addSuperinterface(parametrized(EnumGetter.class, def.typeEnum));		
 
         CodeBlock.Builder getEntityValuesCode = CodeBlock.builder().add("return new Object[]{\n");
 
@@ -48,8 +44,6 @@ public class GenImmutable {
         for(int i=0; i<count; i++) {
         	Property prop = def.getProps().get(i);
 			FieldSpec fieldSpec = addField(builder, PRIVATE().FINAL(), prop.type, prop.name);
-
-			addSetterParameter(constructorBuilder, fieldSpec, null);
         	
 			MethodSpec.Builder g = methodBuilder(PUBLIC(), prop.type, prop.getterName).addAnnotation(Override.class);
 			g.addCode("return "+prop.fieldName+";\n");
@@ -63,10 +57,10 @@ public class GenImmutable {
         MethodSpec.Builder getEntityValues = methodBuilder(PUBLIC(), TN_OBJECT_ARRAY, "getEntityValues").addAnnotation(Override.class);
         getEntityValues.addCode(getEntityValuesCode.build());
         builder.addMethod(getEntityValues.build());
-
-        builder.addMethod(constructorBuilder.build());
-        
+       
         addEnumGetter(def, builder);
+        genConstructor(def,builder,jackson);
+        
 		if(jackson) addDirectSerializer(def,builder);
         
 		return builder;
@@ -162,7 +156,29 @@ public class GenImmutable {
 			method.addCode("default: throw new ArrayIndexOutOfBoundsException(ordinal);\n");
 			method.addCode("}\n");
 		});
+	}
+
+	public static void genConstructor(EntityDef def, TypeSpec.Builder cp, boolean jackson){
+
+        MethodSpec.Builder constr = constructorBuilder(PUBLIC());
+        if(jackson) constr.addAnnotation(CN_JsonCreator);
+		
+        MethodSpec.Builder constr2 = constructorBuilder(PUBLIC());
+        addParameter(constr2,def.type, "v");
+
         
+        int count = def.getProps().size();
+        for(int i=0; i<count; i++) {
+        	Property property = def.getProps().get(i);
+
+        	addSetterParameter(constr, property.type, property.name, param->{
+        		param.addAnnotation(annotationSpec(CN_JsonProperty,"value", "$S",property.name));
+        	});
+        
+        	constr2.addCode("this."+property.name+" = v."+property.getterName +"();\n");
+        }
+        cp.addMethod(constr.build());
+        cp.addMethod(constr2.build());
 	}
 	
 }

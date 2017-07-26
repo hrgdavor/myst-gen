@@ -85,28 +85,11 @@ public class GenBuilder {
         cp.addMethod(getEntityValues.build());
 	}
 	
-	public static void genConstructors(EntityDef def, TypeSpec.Builder cp, boolean jackson){
-        addconstructor(cp, null);
+	public static void genConstructors(EntityDef def, TypeSpec.Builder builder, boolean jackson){
+        // empty default constructor
+		addconstructor(builder, null);
 
-        MethodSpec.Builder constr = constructorBuilder(PUBLIC());
-        if(jackson) constr.addAnnotation(CN_JsonCreator);
-		
-        MethodSpec.Builder constr2 = constructorBuilder(PUBLIC());
-        addParameter(constr2,def.type, "v");
-
-        
-        int count = def.getProps().size();
-        for(int i=0; i<count; i++) {
-        	Property property = def.getProps().get(i);
-
-        	addSetterParameter(constr, property.type, property.name, param->{
-        		param.addAnnotation(annotationSpec(CN_JsonProperty,"value", "$S",property.name));
-        	});
-        
-        	constr2.addCode("this."+property.name+" = v."+property.getterName +"();\n");
-        }
-        cp.addMethod(constr.build());
-        cp.addMethod(constr2.build());
+        GenImmutable.genConstructor(def,builder,jackson);
 	}
 
 	
