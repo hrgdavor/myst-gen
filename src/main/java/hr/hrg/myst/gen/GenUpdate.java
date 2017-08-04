@@ -3,10 +3,13 @@ package hr.hrg.myst.gen;
 import static com.squareup.javapoet.TypeSpec.classBuilder;
 import static hr.hrg.javapoet.PoetUtil.*;
 
+import com.squareup.javapoet.ArrayTypeName;
 import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import com.squareup.javapoet.TypeSpec.Builder;
 
+import hr.hrg.myst.data.EnumArrayUpdateDelta;
 import hr.hrg.myst.data.Update;
 import hr.hrg.myst.data.UpdateDelta;
 
@@ -37,10 +40,13 @@ public class GenUpdate {
 
     	addField(cp,PROTECTED(), long.class, "_changeSet");
 
+    	TypeName returnType = parametrized(EnumArrayUpdateDelta.class,def.typeEnum);
         MethodSpec.Builder getDelta = methodBuilder(PUBLIC(), parametrized(UpdateDelta.class,def.typeEnum), "getDelta" );
         getDelta.addAnnotation(Override.class);
-        getDelta.addCode("return $T.delta(_changeSet,getEntityValues());\n", def.typeMeta);
+        getDelta.addCode("return new $T(_changeSet, getEntityValues(), $T.COLUMN_ARRAY);\n", returnType,def.typeEnum);			
+//        getDelta.addCode("return $T.delta(_changeSet,getEntityValues());\n", def.typeMeta);
         cp.addMethod(getDelta.build());
+
         
         int count = def.getProps().size();
         for(int i=0; i<count; i++) {

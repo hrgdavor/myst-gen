@@ -55,12 +55,12 @@ public class GenMeta {
 		add_makeNew(cp, def);
 		add_fromResultSet(cp, def);
 
-		TypeName returnType = parametrized(EnumArrayUpdateDelta.class,def.typeEnum);
-		addMethod(cp,PUBLIC().STATIC().FINAL(), returnType, "delta", delta->{
-			delta.addParameter(long.class, "changeSet");
-			delta.addParameter(ArrayTypeName.of(Object.class), "values");
-			delta.addCode("return new $T(changeSet, values, $T.COLUMN_ARRAY);\n", returnType,def.typeEnum);			
-		});
+//		TypeName returnType = parametrized(EnumArrayUpdateDelta.class,def.typeEnum);
+//		addMethod(cp,PUBLIC().STATIC().FINAL(), returnType, "delta", delta->{
+//			delta.addParameter(long.class, "changeSet");
+//			delta.addParameter(ArrayTypeName.of(Object.class), "values");
+//			delta.addCode("return new $T(changeSet, values, $T.COLUMN_ARRAY);\n", returnType,def.typeEnum);			
+//		});
 		
 		//@Override
 		//public final Class<Sample> getEntityClass(){ return ENTITY_CLASS; }
@@ -243,7 +243,7 @@ public class GenMeta {
 					}
 					method.addCode(");\n");
 				}else{					
-					method.addCode(",$T.class);\n", i, p.type.box());
+					method.addCode(",$T.class);\n", p.type.box());
 				}
 			}else{
 				method.addCode(" = rs."+getter+"("+i+");\n");
