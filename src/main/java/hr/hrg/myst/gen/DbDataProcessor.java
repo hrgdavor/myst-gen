@@ -109,19 +109,24 @@ public class DbDataProcessor extends AbstractProcessor{
         	builder = new GenImmutable(jackson).gen2(def);
         	write(def.typeImmutable, builder.build(), processingEnv);
 
-        	if(genBuilder){        		
+        	if(genBuilder){
         		builder = new GenBuilder(jackson).gen2(def);
         		write(def.typeBuilder, builder.build(), processingEnv);
         	}
+
+        	if(def.genUpdate){
+				builder = new GenUpdate(jackson, genBuilder).gen2(def);
+				write(def.typeUpdate, builder.build(), processingEnv);
+        	}
+    		if(def.genMeta){
+    			
+    			builder = new GenMeta().gen(def);
+    			write(def.typeDelta, builder.build(), processingEnv);    			
+    			
+//    			builder = new GenDelta().gen2(def);
+//    			write(def.typeDelta, builder.build(), processingEnv);
+    		}
         	
-    		builder = new GenUpdate(jackson, genBuilder).gen2(def);
-    		write(def.typeUpdate, builder.build(), processingEnv);
-        	
-    		builder = new GenMeta().gen(def);
-    		write(def.typeDelta, builder.build(), processingEnv);
-        	
-    		builder = new GenDelta().gen2(def);
-    		write(def.typeDelta, builder.build(), processingEnv);
 
         	        	
 		} catch (Throwable e) {

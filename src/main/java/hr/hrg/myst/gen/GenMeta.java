@@ -12,6 +12,7 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 
@@ -50,15 +51,6 @@ public class GenMeta {
 		// public static final String TABLE_NAME = "sample_table";
 		addField(cp, PUBLIC().STATIC().FINAL(), String.class, "TABLE_NAME", "$S",def.tableName);
 
-		addColumnsDef(cp,def);
-		
-		addField(cp, PUBLIC().STATIC().FINAL(), def.typeEnum, "PRIMARY", field->{
-			if(primaryProp == null) 
-				field.initializer("null");
-			else
-				field.initializer( "$T.$L", def.typeEnum,primaryProp.fieldName);
-		});
-		
 		add_entityValues(cp, def);		
 		add_makeNew(cp, def);
 		add_fromResultSet(cp, def);
@@ -67,7 +59,7 @@ public class GenMeta {
 		addMethod(cp,PUBLIC().STATIC().FINAL(), returnType, "delta", delta->{
 			delta.addParameter(long.class, "changeSet");
 			delta.addParameter(ArrayTypeName.of(Object.class), "values");
-			delta.addCode("return new $T(changeSet, values, COLUMN_ARRAY);\n", returnType);			
+			delta.addCode("return new $T(changeSet, values, $T.COLUMN_ARRAY);\n", returnType,def.typeEnum);			
 		});
 		
 		//@Override
@@ -98,19 +90,19 @@ public class GenMeta {
 		//public final String getColumnNamesStr(){ return COLUMNS_STR; }
 		addMethod(cp,PUBLIC().FINAL(), String.class, "getColumnNamesStr", method->{
 			method.addAnnotation(Override.class);
-			method.addCode("return COLUMNS_STR;\n");
+			method.addCode("return $T.COLUMNS_STR;\n",def.typeEnum);
 		});		
 		//@Override
 		//public final String getColumnNames(){ return COLUMN_NAMES; }
 		addMethod(cp,PUBLIC().FINAL(), parametrized(ImmutableList.class,String.class), "getColumnNames", method->{
 			method.addAnnotation(Override.class);
-			method.addCode("return COLUMN_NAMES;\n");
+			method.addCode("return $T.COLUMN_NAMES;\n",def.typeEnum);
 		});		
 		//@Override
 		//public final String getColumns(){ return COLUMNS; }
 		addMethod(cp,PUBLIC().FINAL(), parametrized(ImmutableList.class,def.typeEnum), "getColumns", method->{
 			method.addAnnotation(Override.class);
-			method.addCode("return COLUMNS;\n");
+			method.addCode("return $T.COLUMNS;\n",def.typeEnum);
 		});		
 		//@Override
 		//public final String getPrimaryColumn(){ return COLUMNS_STR; }
@@ -124,13 +116,13 @@ public class GenMeta {
 			method.addParameter(String.class, "name");
 			method.addAnnotation(Override.class);
 			method.addCode("return $T.valueOf(name);\n",def.typeEnum);
-		});	
+		});
 		//@Override
 		//public final SampleEnum getColumn(String name){ return COLUMN_ARRAY[ordinal]; }
 		addMethod(cp,PUBLIC().FINAL(), def.typeEnum, "getColumn", method->{
 			method.addParameter(int.class, "ordinal");
 			method.addAnnotation(Override.class);
-			method.addCode("return COLUMN_ARRAY[ordinal];\n");
+			method.addCode("return $T.COLUMN_ARRAY[ordinal];\n",def.typeEnum);
 		});	
 		
 		if(primaryProp == null){
@@ -242,7 +234,17 @@ public class GenMeta {
 				getter = "getString";
 			}
 			if(getter == null){
-				method.addCode(" = handler.getFromResultSet(rs,$L,$T.class);\n", i, p.type.box());
+				method.addCode(" = handler.getFromResultSet(rs,$L", i);
+				if(p.type instanceof ParameterizedTypeName){
+					ParameterizedTypeName parameterizedTypeName = (ParameterizedTypeName)p.type;
+					method.addCode(",$T.class",parameterizedTypeName.rawType);
+					for(TypeName ta: parameterizedTypeName.typeArguments){
+						method.addCode(",$T.class",ta);					
+					}
+					method.addCode(");\n");
+				}else{					
+					method.addCode(",$T.class);\n", i, p.type.box());
+				}
 			}else{
 				method.addCode(" = rs."+getter+"("+i+");\n");
 			}
@@ -260,42 +262,5 @@ public class GenMeta {
 		method.addCode(returnValue.build());
 		
 		cp.addMethod(method.build());
-	}
-
-	private void addColumnsDef(TypeSpec.Builder cp, EntityDef def) {
-		List<String> colNames = new ArrayList<>();
-		for(Property p:def.props) {
-			colNames.add(p.columnName);
-		}
-
-		StringBuffer arr = new StringBuffer("(");
-		StringBuffer str = new StringBuffer("\"");
-
-		String delim = "";
-		for (String col : colNames) {
-			arr.append(delim); str.append(delim);
-			arr.append("\"").append(col).append("\"");
-			str.append(col);
-			delim = ",";
-		}
-
-		str.append("\"");
-		arr.append(")");
-		
-		addField(cp,PUBLIC().STATIC().FINAL(), String.class, "COLUMNS_STR", 
-				field->field.initializer(str.toString()));
-		
-		addField(cp,PUBLIC().STATIC().FINAL(), int.class, "COLUMN_COUNT", 
-				field->field.initializer(""+def.props.size()));
-		
-		addField(cp,PUBLIC().STATIC().FINAL(), parametrized(ImmutableList.class, String.class), "COLUMN_NAMES", 
-				field->field.initializer("ImmutableList.safe"+arr.toString()));
-		
-		addField(cp,PUBLIC().STATIC().FINAL(), ArrayTypeName.of(def.typeEnum), "COLUMN_ARRAY", 
-				field->field.initializer("$T.values()",def.typeEnum));
-
-		addField(cp,PUBLIC().STATIC().FINAL(), parametrized(ImmutableList.class, def.typeEnum), "COLUMNS", 
-				field->field.initializer("ImmutableList.safe(COLUMN_ARRAY);"));
-		
 	}
 }

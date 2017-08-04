@@ -30,6 +30,9 @@ public class EntityDef {
 	public final ClassName typeMeta;
 	public final ClassName typeDelta;
 	public final ClassName type;
+
+	public final boolean genMeta;
+	public final boolean genUpdate;
 	
 	public EntityDef(TypeElement clazz){
 		String qName = clazz.getQualifiedName().toString();
@@ -46,7 +49,8 @@ public class EntityDef {
 			this.tableName = mystEntity.table();
 		else 
 			this.tableName = simpleName.toLowerCase();
-		
+		genMeta = mystEntity.genMeta();
+		genUpdate = mystEntity.genUpdate();
 		this.type = ClassName.get(clazz);
 
 		this.typeEnum      = ClassName.get(packageName, simpleName+"Enum");
